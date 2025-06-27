@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - PV + BESS Payback Calculator{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Calculate Your Solar + Battery Payback Period
+                </h1>
+                <p class="lead mb-4">
+                    Get accurate financial projections for your PV + BESS investment. 
+                    Analyze payback periods, ROI, and long-term savings with our comprehensive calculator.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#quick-calculator" class="btn btn-light btn-lg">
+                        <i class="fas fa-calculator me-2"></i>Quick Calculator
+                    </a>
+                    <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>Detailed Analysis
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-solar-panel" style="font-size: 8rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">Why Use Our Calculator?</h2>
+                <p class="lead text-muted">Comprehensive analysis for informed investment decisions</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-chart-pie text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Accurate Modeling</h5>
+                        <p class="card-text">
+                            Advanced algorithms that consider location-specific solar data, 
+                            battery efficiency, and real-world usage patterns.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Financial Analysis</h5>
+                        <p class="card-text">
+                            Calculate payback period, NPV, IRR, and total savings over 
+                            the system lifetime with inflation and degradation factors.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-battery-three-quarters text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Battery Integration</h5>
+                        <p class="card-text">
+                            Model battery storage behavior, self-consumption optimization, 
+                            and grid interaction for maximum financial benefit.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Calculator Section -->
+<section id="quick-calculator" class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-calculator me-2"></i>Quick Payback Calculator
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.annual_consumption.id_for_label }}" class="form-label">
+                                        {{ form.annual_consumption.label }}
+                                    </label>
+                                    {{ form.annual_consumption }}
+                                    {% if form.annual_consumption.help_text %}
+                                    <div class="form-text">{{ form.annual_consumption.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.annual_consumption.errors %}
+                                    <div class="text-danger">{{ form.annual_consumption.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.electricity_rate.id_for_label }}" class="form-label">
+                                        {{ form.electricity_rate.label }}
+                                    </label>
+                                    {{ form.electricity_rate }}
+                                    {% if form.electricity_rate.help_text %}
+                                    <div class="form-text">{{ form.electricity_rate.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.electricity_rate.errors %}
+                                    <div class="text-danger">{{ form.electricity_rate.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.system_size.id_for_label }}" class="form-label">
+                                        {{ form.system_size.label }}
+                                    </label>
+                                    {{ form.system_size }}
+                                    {% if form.system_size.help_text %}
+                                    <div class="form-text">{{ form.system_size.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.system_size.errors %}
+                                    <div class="text-danger">{{ form.system_size.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.battery_capacity.id_for_label }}" class="form-label">
+                                        {{ form.battery_capacity.label }}
+                                    </label>
+                                    {{ form.battery_capacity }}
+                                    {% if form.battery_capacity.help_text %}
+                                    <div class="form-text">{{ form.battery_capacity.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.battery_capacity.errors %}
+                                    <div class="text-danger">{{ form.battery_capacity.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.pv_cost_per_kw.id_for_label }}" class="form-label">
+                                        {{ form.pv_cost_per_kw.label }}
+                                    </label>
+                                    {{ form.pv_cost_per_kw }}
+                                    {% if form.pv_cost_per_kw.help_text %}
+                                    <div class="form-text">{{ form.pv_cost_per_kw.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.pv_cost_per_kw.errors %}
+                                    <div class="text-danger">{{ form.pv_cost_per_kw.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.battery_cost_per_kwh.id_for_label }}" class="form-label">
+                                        {{ form.battery_cost_per_kwh.label }}
+                                    </label>
+                                    {{ form.battery_cost_per_kwh }}
+                                    {% if form.battery_cost_per_kwh.help_text %}
+                                    <div class="form-text">{{ form.battery_cost_per_kwh.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.battery_cost_per_kwh.errors %}
+                                    <div class="text-danger">{{ form.battery_cost_per_kwh.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-calculator me-2"></i>Calculate Payback Period
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">How It Works</h2>
+                <p class="lead text-muted">Simple steps to get your payback analysis</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="step-indicator">
+                    <div class="step active">1</div>
+                </div>
+                <h5>Input Your Data</h5>
+                <p class="text-muted">Enter your energy consumption, system specifications, and costs</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-indicator">
+                    <div class="step">2</div>
+                </div>
+                <h5>Advanced Modeling</h5>
+                <p class="text-muted">Our algorithms model solar generation and battery behavior</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-indicator">
+                    <div class="step">3</div>
+                </div>
+                <h5>Financial Analysis</h5>
+                <p class="text-muted">Calculate payback period, NPV, and total savings</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-indicator">
+                    <div class="step">4</div>
+                </div>
+                <h5>Get Results</h5>
+                <p class="text-muted">View detailed reports and visualizations</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

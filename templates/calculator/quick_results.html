@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Quick Results - PV + BESS Payback Calculator{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'calculator:home' %}">Home</a></li>
+                    <li class="breadcrumb-item active">Quick Results</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Results Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Payback Analysis Results
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-0">
+                        Based on your inputs, here's your PV + BESS system financial analysis:
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">
+                    {% if results.payback_period == float('inf') %}
+                        N/A
+                    {% else %}
+                        {{ results.payback_period|floatformat:1 }}
+                    {% endif %}
+                </div>
+                <div class="metric-label">Payback Period (Years)</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">${{ results.system_cost_after_tax_credit|floatformat:0 }}</div>
+                <div class="metric-label">System Cost (After Tax Credit)</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">${{ results.annual_savings|floatformat:0 }}</div>
+                <div class="metric-label">Annual Savings</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ results.total_generation|floatformat:0 }}</div>
+                <div class="metric-label">Annual Generation (kWh)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Detailed Analysis
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>System Specifications</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>PV System Size:</strong> {{ form.system_size.value }} kW</li>
+                                <li><strong>Battery Capacity:</strong> {{ form.battery_capacity.value }} kWh</li>
+                                <li><strong>Annual Consumption:</strong> {{ form.annual_consumption.value|floatformat:0 }} kWh</li>
+                                <li><strong>Electricity Rate:</strong> ${{ form.electricity_rate.value }}/kWh</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Financial Summary</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Total System Cost:</strong> ${{ results.system_cost|floatformat:0 }}</li>
+                                <li><strong>Federal Tax Credit:</strong> ${{ results.system_cost|add:"-"|add:results.system_cost_after_tax_credit|floatformat:0 }}</li>
+                                <li><strong>Net System Cost:</strong> ${{ results.system_cost_after_tax_credit|floatformat:0 }}</li>
+                                <li><strong>Annual Savings:</strong> ${{ results.annual_savings|floatformat:0 }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Flow Chart -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Energy Flow Analysis
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="energyFlowChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Recommendations -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if results.payback_period <= 7 %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-thumbs-up me-2"></i>
+                            <strong>Excellent Investment!</strong> Your payback period of {{ results.payback_period|floatformat:1 }} years is very attractive.
+                        </div>
+                    {% elif results.payback_period <= 10 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Good Investment</strong> Your payback period of {{ results.payback_period|floatformat:1 }} years is reasonable.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Consider Optimization</strong> Your payback period of {{ results.payback_period|floatformat:1 }} years may benefit from system adjustments.
+                        </div>
+                    {% endif %}
+
+                    <h6>Optimization Tips:</h6>
+                    <ul class="small">
+                        <li>Consider larger battery capacity for better self-consumption</li>
+                        <li>Optimize panel orientation for your location</li>
+                        <li>Look for additional state incentives</li>
+                        <li>Consider time-of-use rate optimization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-arrow-right me-2"></i>Next Steps
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Detailed Analysis
+                        </a>
+                        <a href="{% url 'calculator:home' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-calculator me-2"></i>New Calculation
+                        </a>
+                        <button class="btn btn-outline-info" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Energy Flow Chart
+const ctx = document.getElementById('energyFlowChart').getContext('2d');
+const energyFlowChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Self-Consumption', 'Grid Export', 'Grid Import'],
+        datasets: [{
+            data: [
+                {{ results.self_consumption }},
+                {{ results.grid_export }},
+                {{ results.grid_import }}
+            ],
+            backgroundColor: [
+                '#2E8B57',
+                '#20B2AA',
+                '#FF6B6B'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value.toFixed(0)} kWh (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

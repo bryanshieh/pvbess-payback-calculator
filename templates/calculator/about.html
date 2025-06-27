@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}About - PV + BESS Payback Calculator{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>About PV + BESS Payback Calculator
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <h4>Our Mission</h4>
+                    <p class="lead">
+                        We provide accurate, comprehensive financial analysis tools to help homeowners and businesses 
+                        make informed decisions about solar photovoltaic (PV) and battery energy storage system (BESS) investments.
+                    </p>
+
+                    <h4>Why Solar + Battery Storage?</h4>
+                    <p>
+                        The combination of solar panels and battery storage offers significant advantages:
+                    </p>
+                    <ul>
+                        <li><strong>Energy Independence:</strong> Generate and store your own electricity</li>
+                        <li><strong>Cost Savings:</strong> Reduce or eliminate electricity bills</li>
+                        <li><strong>Grid Resilience:</strong> Maintain power during outages</li>
+                        <li><strong>Environmental Impact:</strong> Reduce carbon footprint</li>
+                        <li><strong>Financial Returns:</strong> Attractive payback periods and ROI</li>
+                    </ul>
+
+                    <h4>Our Calculator Features</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-line text-primary me-2"></i>Advanced Modeling</h5>
+                            <ul>
+                                <li>Location-specific solar irradiance data</li>
+                                <li>Realistic battery behavior simulation</li>
+                                <li>Seasonal energy consumption patterns</li>
+                                <li>System degradation over time</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-calculator text-primary me-2"></i>Financial Analysis</h5>
+                            <ul>
+                                <li>Payback period calculations</li>
+                                <li>Net Present Value (NPV) analysis</li>
+                                <li>Internal Rate of Return (IRR)</li>
+                                <li>Inflation and tax credit considerations</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h4>How It Works</h4>
+                    <p>
+                        Our calculator uses sophisticated algorithms to model:
+                    </p>
+                    <ol>
+                        <li><strong>Solar Generation:</strong> Based on your location, panel orientation, and system specifications</li>
+                        <li><strong>Battery Operation:</strong> Charge/discharge cycles, efficiency losses, and control strategies</li>
+                        <li><strong>Energy Flow:</strong> Self-consumption, grid import/export, and net metering</li>
+                        <li><strong>Financial Impact:</strong> Cost savings, incentives, and long-term returns</li>
+                    </ol>
+
+                    <h4>Accuracy and Reliability</h4>
+                    <p>
+                        Our calculations are based on:
+                    </p>
+                    <ul>
+                        <li>Industry-standard solar modeling algorithms</li>
+                        <li>Real-world battery performance data</li>
+                        <li>Current market pricing and incentives</li>
+                        <li>Conservative assumptions for reliability</li>
+                    </ul>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Note:</strong> While our calculator provides accurate estimates, actual results may vary 
+                        due to factors such as weather patterns, system performance, and electricity rate changes. 
+                        We recommend consulting with qualified solar installers for detailed site-specific analysis.
+                    </div>
+
+                    <h4>Get Started</h4>
+                    <p>
+                        Ready to explore your solar + battery investment potential? Start with our 
+                        <a href="{% url 'calculator:home' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calculator me-1"></i>Quick Calculator
+                        </a>
+                        for a fast estimate, or use our 
+                        <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-chart-line me-1"></i>Detailed Calculator
+                        </a>
+                        for comprehensive analysis.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

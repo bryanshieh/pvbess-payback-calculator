@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Help - PV + BESS Payback Calculator{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Help & User Guide
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <h4>Getting Started</h4>
+                    <p>
+                        Welcome to the PV + BESS Payback Calculator! This tool helps you analyze the financial 
+                        viability of installing solar panels and battery storage for your home or business.
+                    </p>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-bolt text-warning me-2"></i>Quick Calculator
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="small">Perfect for getting a fast estimate of your payback period.</p>
+                                    <ul class="small">
+                                        <li>Basic system specifications</li>
+                                        <li>Annual consumption estimate</li>
+                                        <li>Quick financial analysis</li>
+                                        <li>Results in 2-3 minutes</li>
+                                    </ul>
+                                    <a href="{% url 'calculator:home' %}" class="btn btn-primary btn-sm">
+                                        Try Quick Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-line text-success me-2"></i>Detailed Calculator
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="small">Comprehensive analysis with location-specific modeling.</p>
+                                    <ul class="small">
+                                        <li>Monthly consumption data</li>
+                                        <li>Location and orientation</li>
+                                        <li>Advanced battery modeling</li>
+                                        <li>Detailed financial projections</li>
+                                    </ul>
+                                    <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-success btn-sm">
+                                        Try Detailed Calculator
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>Understanding Your Results</h4>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Key Metrics Explained</h5>
+                            <ul>
+                                <li><strong>Payback Period:</strong> Time to recover your investment through energy savings</li>
+                                <li><strong>Annual Savings:</strong> Yearly reduction in electricity costs</li>
+                                <li><strong>System Cost:</strong> Total installation cost (before/after incentives)</li>
+                                <li><strong>NPV (25 years):</strong> Net Present Value over system lifetime</li>
+                                <li><strong>IRR:</strong> Internal Rate of Return on your investment</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Energy Flow Terms</h5>
+                            <ul>
+                                <li><strong>Self-Consumption:</strong> Solar energy used directly by your home</li>
+                                <li><strong>Grid Export:</strong> Excess solar energy sent to the grid</li>
+                                <li><strong>Grid Import:</strong> Energy purchased from the grid</li>
+                                <li><strong>Battery Storage:</strong> Energy stored in your battery system</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h4>Data Requirements</h4>
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-clipboard-list me-2"></i>What You'll Need</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Essential Information:</h6>
+                                <ul>
+                                    <li>Monthly electricity bills (12 months)</li>
+                                    <li>Your address or coordinates</li>
+                                    <li>Current electricity rate</li>
+                                    <li>System size estimates</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Optional (for detailed analysis):</h6>
+                                <ul>
+                                    <li>Roof orientation and tilt</li>
+                                    <li>Peak demand information</li>
+                                    <li>Time-of-use rate details</li>
+                                    <li>Local incentive programs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>Step-by-Step Guide</h4>
+                    <div class="accordion" id="helpAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    Step 1: Energy Profile
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>Enter your monthly electricity consumption from your utility bills.</p>
+                                    <ul>
+                                        <li>Look for "kWh" or "kilowatt-hours" on your bill</li>
+                                        <li>Enter the total consumption for each month</li>
+                                        <li>Include peak demand if available</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    Step 2: PV System
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>Specify your solar panel system details.</p>
+                                    <ul>
+                                        <li>System size in kilowatts (kW)</li>
+                                        <li>Your location (latitude/longitude)</li>
+                                        <li>Panel orientation and tilt angle</li>
+                                        <li>System efficiency factors</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    Step 3: BESS System
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>Configure your battery storage system.</p>
+                                    <ul>
+                                        <li>Battery capacity in kilowatt-hours (kWh)</li>
+                                        <li>Charge/discharge rates</li>
+                                        <li>Efficiency specifications</li>
+                                        <li>Control strategy preferences</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    Step 4: Financial Parameters
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>Set up your financial assumptions.</p>
+                                    <ul>
+                                        <li>System installation costs</li>
+                                        <li>Electricity rates and inflation</li>
+                                        <li>Available incentives and tax credits</li>
+                                        <li>Discount rate for NPV calculations</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">Tips for Accurate Results</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Data Quality</h5>
+                            <ul>
+                                <li>Use actual consumption data when possible</li>
+                                <li>Include all months for seasonal accuracy</li>
+                                <li>Verify your location coordinates</li>
+                                <li>Get current pricing from local installers</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Optimization</h5>
+                            <ul>
+                                <li>Try different system sizes</li>
+                                <li>Compare various battery capacities</li>
+                                <li>Test different orientations</li>
+                                <li>Consider time-of-use rates</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Disclaimer:</strong> This calculator provides estimates for educational and planning purposes. 
+                        Actual results may vary. Always consult with qualified solar installers for detailed site analysis 
+                        and professional recommendations.
+                    </div>
+
+                    <h4>Need More Help?</h4>
+                    <p>
+                        If you have questions or need assistance, please refer to our 
+                        <a href="{% url 'calculator:about' %}">About page</a> for more information about our methodology, 
+                        or contact a qualified solar installer in your area for professional advice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
