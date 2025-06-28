@@ -1,200 +1,224 @@
 {% extends 'base.html' %}
 
-{% block title %}Detailed Calculator - PV + BESS Payback Calculator{% endblock %}
+{% block title %}Detailed Calculation Results - PV + BESS Calculator{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Step Indicator -->
-    <div class="step-indicator">
-        <div class="step active">1</div>
-        <div class="step">2</div>
-        <div class="step">3</div>
-        <div class="step">4</div>
-        <div class="step">5</div>
-    </div>
-
-    <!-- Header -->
-    <div class="row mb-4">
+<div class="container mt-4">
+    <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Detailed PV + BESS Calculator
-                    </h2>
+                <div class="card-header">
+                    <h2 class="mb-0">Detailed Calculation Results</h2>
                 </div>
                 <div class="card-body">
-                    <p class="lead mb-0">
-                        Follow these steps to get a comprehensive analysis of your solar + battery investment.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Steps -->
-    <div class="row">
-        <div class="col-lg-3">
-            <!-- Step Navigation -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Calculation Steps</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <a href="{% url 'calculator:energy_profile_create' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-chart-bar me-2"></i>
-                                Energy Profile
+                    <!-- Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">Payback Period</h4>
+                                    <h2 class="mb-0">
+                                        {% if results.financial_results.payback_period_years < 999999 %}
+                                            {{ results.financial_results.payback_period_years|floatformat:1 }} years
+                                        {% else %}
+                                            >25 years
+                                        {% endif %}
+                                    </h2>
+                                </div>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="{% url 'calculator:pv_system_create' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-solar-panel me-2"></i>
-                                PV System
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">Annual Savings</h4>
+                                    <h2 class="mb-0">${{ results.financial_results.annual_savings|floatformat:0 }}</h2>
+                                </div>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="{% url 'calculator:bess_system_create' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-battery-three-quarters me-2"></i>
-                                BESS System
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">NPV (25 years)</h4>
+                                    <h2 class="mb-0">${{ results.financial_results.npv_25_years|floatformat:0 }}</h2>
+                                </div>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="{% url 'calculator:financial_params_create' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-dollar-sign me-2"></i>
-                                Financial Parameters
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">IRR</h4>
+                                    <h2 class="mb-0">{{ results.financial_results.irr_percent|floatformat:1 }}%</h2>
+                                </div>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="{% url 'calculator:run_calculation' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-calculator me-2"></i>
-                                Calculate Results
-                            </div>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Help Section -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-question-circle me-2"></i>Need Help?
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="small">
-                        Each step collects specific information needed for accurate calculations. 
-                        Take your time to provide accurate data for the best results.
-                    </p>
-                    <a href="{% url 'calculator:help' %}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-book me-1"></i>View Help Guide
-                    </a>
-                </div>
-            </div>
-        </div>
+                    <!-- System Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>System Specifications</h4>
+                            <table class="table table-striped">
+                                <tr>
+                                    <td><strong>PV System Size:</strong></td>
+                                    <td>{{ pv_system.system_size_kw }} kW</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>BESS Capacity:</strong></td>
+                                    <td>{{ bess_system.capacity_kwh }} kWh</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total System Cost:</strong></td>
+                                    <td>${{ results.financial_results.total_system_cost|floatformat:0 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Net Cost (after incentives):</strong></td>
+                                    <td>${{ results.financial_results.net_system_cost|floatformat:0 }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Energy Analysis</h4>
+                            <table class="table table-striped">
+                                <tr>
+                                    <td><strong>Annual Consumption:</strong></td>
+                                    <td>{{ results.total_consumption|floatformat:0 }} kWh</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Annual PV Production:</strong></td>
+                                    <td>{{ results.total_pv_production|floatformat:0 }} kWh</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Self-Consumption Rate:</strong></td>
+                                    <td>{{ results.total_pv_production|div:results.total_consumption|mul:100|floatformat:1 }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Annual Savings:</strong></td>
+                                    <td>{{ results.annual_savings|floatformat:0 }} kWh</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
 
-        <div class="col-lg-9">
-            <!-- Step Content -->
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Getting Started
-                    </h4>
-                </div>
-                <div class="card-body">
+                    <!-- Monthly Breakdown Chart -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4>Monthly Energy Flow</h4>
+                            <canvas id="monthlyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Data Table -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4>Monthly Breakdown</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Month</th>
+                                            <th>Consumption (kWh)</th>
+                                            <th>PV Production (kWh)</th>
+                                            <th>BESS Energy (kWh)</th>
+                                            <th>Grid Energy (kWh)</th>
+                                            <th>Savings (kWh)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for month_data in results.monthly_results %}
+                                        <tr>
+                                            <td>{{ month_data.month }}</td>
+                                            <td>{{ month_data.consumption|floatformat:0 }}</td>
+                                            <td>{{ month_data.pv_production|floatformat:0 }}</td>
+                                            <td>{{ month_data.bess_energy|floatformat:0 }}</td>
+                                            <td>{{ month_data.grid_energy|floatformat:0 }}</td>
+                                            <td>{{ month_data.savings|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
                     <div class="row">
-                        <div class="col-md-6">
-                            <h5>What You'll Need:</h5>
-                            <ul>
-                                <li>Monthly electricity bills (12 months)</li>
-                                <li>Your location (latitude/longitude)</li>
-                                <li>Roof orientation and tilt</li>
-                                <li>Current electricity rates</li>
-                                <li>System cost estimates</li>
-                            </ul>
+                        <div class="col-12 text-center">
+                            <a href="{% url 'calculator:energy_profile_form' %}" class="btn btn-secondary">Start New Calculation</a>
+                            <a href="{% url 'calculator:my_calculations' %}" class="btn btn-info">View All Calculations</a>
+                            <a href="{% url 'calculator:home' %}" class="btn btn-primary">Back to Home</a>
                         </div>
-                        <div class="col-md-6">
-                            <h5>Benefits of Detailed Analysis:</h5>
-                            <ul>
-                                <li>Location-specific solar modeling</li>
-                                <li>Accurate battery simulation</li>
-                                <li>Detailed financial projections</li>
-                                <li>Monthly energy flow analysis</li>
-                                <li>Optimization recommendations</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div class="text-center">
-                        <a href="{% url 'calculator:energy_profile_create' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-arrow-right me-2"></i>Start with Energy Profile
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features Comparison -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-table me-2"></i>Quick vs Detailed Calculator
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Feature</th>
-                                    <th class="text-center">Quick Calculator</th>
-                                    <th class="text-center">Detailed Calculator</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Input Time</td>
-                                    <td class="text-center">2-3 minutes</td>
-                                    <td class="text-center">10-15 minutes</td>
-                                </tr>
-                                <tr>
-                                    <td>Accuracy</td>
-                                    <td class="text-center">Good estimate</td>
-                                    <td class="text-center">High accuracy</td>
-                                </tr>
-                                <tr>
-                                    <td>Location Modeling</td>
-                                    <td class="text-center">Basic</td>
-                                    <td class="text-center">Detailed</td>
-                                </tr>
-                                <tr>
-                                    <td>Battery Simulation</td>
-                                    <td class="text-center">Simplified</td>
-                                    <td class="text-center">Advanced</td>
-                                </tr>
-                                <tr>
-                                    <td>Financial Analysis</td>
-                                    <td class="text-center">Basic metrics</td>
-                                    <td class="text-center">Comprehensive</td>
-                                </tr>
-                                <tr>
-                                    <td>Results Detail</td>
-                                    <td class="text-center">Summary</td>
-                                    <td class="text-center">Full report</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    
+    const monthlyData = {{ results.monthly_results|safe }};
+    const months = monthlyData.map(item => {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return monthNames[item.month - 1];
+    });
+    
+    const consumption = monthlyData.map(item => item.consumption);
+    const pvProduction = monthlyData.map(item => item.pv_production);
+    const gridEnergy = monthlyData.map(item => item.grid_energy);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Consumption',
+                data: consumption,
+                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }, {
+                label: 'PV Production',
+                data: pvProduction,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Grid Energy',
+                data: gridEnergy,
+                backgroundColor: 'rgba(255, 206, 86, 0.8)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Energy (kWh)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Energy Flow'
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %} 

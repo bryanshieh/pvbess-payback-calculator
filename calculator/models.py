@@ -9,6 +9,14 @@ class EnergyProfile(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    # File upload for energy data
+    energy_data_file = models.FileField(
+        upload_to='energy_data/',
+        null=True,
+        blank=True,
+        help_text="Upload CSV or XML file with monthly energy consumption data"
+    )
+    
     # Monthly energy consumption (kWh)
     jan_consumption = models.FloatField(default=0)
     feb_consumption = models.FloatField(default=0)

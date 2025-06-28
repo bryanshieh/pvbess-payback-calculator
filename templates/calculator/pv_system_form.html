@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}PV System Specifications - PV + BESS Calculator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Step 2: PV System Specifications</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>System Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.name.id_for_label }}">System Name</label>
+                                            {{ form.name }}
+                                            <small class="form-text text-muted">Give your PV system a descriptive name</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.system_size_kw.id_for_label }}">System Size (kW)</label>
+                                            {{ form.system_size_kw }}
+                                            <small class="form-text text-muted">Total DC capacity of the PV system</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Efficiency Parameters</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.panel_efficiency.id_for_label }}">Panel Efficiency</label>
+                                            {{ form.panel_efficiency }}
+                                            <small class="form-text text-muted">Typical range: 0.15-0.25</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.inverter_efficiency.id_for_label }}">Inverter Efficiency</label>
+                                            {{ form.inverter_efficiency }}
+                                            <small class="form-text text-muted">Typical range: 0.94-0.98</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.system_efficiency.id_for_label }}">System Efficiency</label>
+                                            {{ form.system_efficiency }}
+                                            <small class="form-text text-muted">Overall system derating factor</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Location and Orientation</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.latitude.id_for_label }}">Latitude (°)</label>
+                                            {{ form.latitude }}
+                                            <small class="form-text text-muted">Decimal degrees (e.g., 34.0522 for Los Angeles)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.longitude.id_for_label }}">Longitude (°)</label>
+                                            {{ form.longitude }}
+                                            <small class="form-text text-muted">Decimal degrees (e.g., -118.2437 for Los Angeles)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.tilt_angle.id_for_label }}">Tilt Angle (°)</label>
+                                            {{ form.tilt_angle }}
+                                            <small class="form-text text-muted">Panel tilt from horizontal (0-90°)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.azimuth.id_for_label }}">Azimuth (°)</label>
+                                            {{ form.azimuth }}
+                                            <small class="form-text text-muted">Panel orientation (180° = South)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Degradation</h5>
+                                <div class="form-group">
+                                    <label for="{{ form.annual_degradation.id_for_label }}">Annual Degradation Rate</label>
+                                    {{ form.annual_degradation }}
+                                    <small class="form-text text-muted">Typical range: 0.3-0.8% per year</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'calculator:energy_profile_form' %}" class="btn btn-secondary">Back</a>
+                            <button type="submit" class="btn btn-primary">Next: BESS System Specifications</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

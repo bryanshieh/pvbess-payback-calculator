@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Parameters - PV + BESS Calculator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Step 4: Financial Parameters</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Profile Information</h5>
+                                <div class="form-group">
+                                    <label for="{{ form.name.id_for_label }}">Profile Name</label>
+                                    {{ form.name }}
+                                    <small class="form-text text-muted">Give your financial profile a descriptive name</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>System Costs</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.pv_cost_per_kw.id_for_label }}">PV Cost per kW ($)</label>
+                                            {{ form.pv_cost_per_kw }}
+                                            <small class="form-text text-muted">Typical range: $1,500-$3,000/kW</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.bess_cost_per_kwh.id_for_label }}">BESS Cost per kWh ($)</label>
+                                            {{ form.bess_cost_per_kwh }}
+                                            <small class="form-text text-muted">Typical range: $300-$800/kWh</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.installation_cost_percent.id_for_label }}">Installation Cost (%)</label>
+                                            {{ form.installation_cost_percent }}
+                                            <small class="form-text text-muted">As percentage of hardware cost</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Electricity Rates</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.electricity_rate.id_for_label }}">Base Rate ($/kWh)</label>
+                                            {{ form.electricity_rate }}
+                                            <small class="form-text text-muted">Your current electricity rate</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.peak_rate.id_for_label }}">Peak Rate ($/kWh)</label>
+                                            {{ form.peak_rate }}
+                                            <small class="form-text text-muted">Peak time electricity rate</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.off_peak_rate.id_for_label }}">Off-Peak Rate ($/kWh)</label>
+                                            {{ form.off_peak_rate }}
+                                            <small class="form-text text-muted">Off-peak time electricity rate</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Incentives</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.federal_tax_credit.id_for_label }}">Federal Tax Credit</label>
+                                            {{ form.federal_tax_credit }}
+                                            <small class="form-text text-muted">Federal tax credit rate (0-1)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.state_incentive.id_for_label }}">State Incentive ($/kWh)</label>
+                                            {{ form.state_incentive }}
+                                            <small class="form-text text-muted">State-level incentive per kWh</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Financial Parameters</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.discount_rate.id_for_label }}">Discount Rate</label>
+                                            {{ form.discount_rate }}
+                                            <small class="form-text text-muted">For NPV calculations (0-1)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.electricity_inflation.id_for_label }}">Electricity Inflation</label>
+                                            {{ form.electricity_inflation }}
+                                            <small class="form-text text-muted">Annual rate increase (0-1)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.system_lifetime.id_for_label }}">System Lifetime (years)</label>
+                                            {{ form.system_lifetime }}
+                                            <small class="form-text text-muted">Expected system lifetime</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'calculator:bess_system_form' %}" class="btn btn-secondary">Back</a>
+                            <button type="submit" class="btn btn-primary">Run Detailed Calculation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

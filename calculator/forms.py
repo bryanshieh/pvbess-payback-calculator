@@ -3,69 +3,94 @@ from .models import EnergyProfile, PVSystem, BESSSystem, FinancialParameters
 
 
 class EnergyProfileForm(forms.ModelForm):
-    """Form for energy profile input"""
+    """Form for energy profile data entry"""
+    
     class Meta:
         model = EnergyProfile
         fields = [
-            'name', 'jan_consumption', 'feb_consumption', 'mar_consumption',
-            'apr_consumption', 'may_consumption', 'jun_consumption',
-            'jul_consumption', 'aug_consumption', 'sep_consumption',
-            'oct_consumption', 'nov_consumption', 'dec_consumption', 'peak_demand'
+            'name', 'jan_consumption', 'feb_consumption', 
+            'mar_consumption', 'apr_consumption', 'may_consumption', 'jun_consumption',
+            'jul_consumption', 'aug_consumption', 'sep_consumption', 'oct_consumption',
+            'nov_consumption', 'dec_consumption', 'peak_demand'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'jan_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'feb_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'mar_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'apr_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'may_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'jun_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'jul_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'aug_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'sep_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'oct_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'nov_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'dec_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'peak_demand': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+            'jan_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'feb_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'mar_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'apr_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'may_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'jun_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'jul_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'aug_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'sep_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'oct_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'nov_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'dec_consumption': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'peak_demand': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
-        labels = {
-            'name': 'Profile Name',
-            'jan_consumption': 'January (kWh)',
-            'feb_consumption': 'February (kWh)',
-            'mar_consumption': 'March (kWh)',
-            'apr_consumption': 'April (kWh)',
-            'may_consumption': 'May (kWh)',
-            'jun_consumption': 'June (kWh)',
-            'jul_consumption': 'July (kWh)',
-            'aug_consumption': 'August (kWh)',
-            'sep_consumption': 'September (kWh)',
-            'oct_consumption': 'October (kWh)',
-            'nov_consumption': 'November (kWh)',
-            'dec_consumption': 'December (kWh)',
-            'peak_demand': 'Peak Demand (kW)',
-        }
+    
+    def clean(self):
+        """Validate that monthly data is provided"""
+        cleaned_data = super().clean()
+        
+        # Check if monthly consumption data is provided
+        monthly_fields = [
+            'jan_consumption', 'feb_consumption', 'mar_consumption', 'apr_consumption',
+            'may_consumption', 'jun_consumption', 'jul_consumption', 'aug_consumption',
+            'sep_consumption', 'oct_consumption', 'nov_consumption', 'dec_consumption'
+        ]
+        
+        has_monthly_data = False
+        total_consumption = 0
+        
+        for field in monthly_fields:
+            value = cleaned_data.get(field)
+            if value is not None:
+                try:
+                    # Convert to float and check if positive
+                    float_value = float(value)
+                    if float_value > 0:
+                        has_monthly_data = True
+                        total_consumption += float_value
+                except (ValueError, TypeError):
+                    # Skip invalid values
+                    pass
+        
+        # Also check if name is provided
+        name = cleaned_data.get('name', '').strip()
+        if not name:
+            raise forms.ValidationError("Please provide a profile name.")
+        
+        if not has_monthly_data:
+            raise forms.ValidationError(
+                "Please enter monthly consumption data manually."
+            )
+        
+        return cleaned_data
 
 
 class PVSystemForm(forms.ModelForm):
     """Form for PV system specifications"""
+    
     class Meta:
         model = PVSystem
         fields = [
             'name', 'system_size_kw', 'panel_efficiency', 'inverter_efficiency',
-            'system_efficiency', 'latitude', 'longitude', 'tilt_angle',
-            'azimuth', 'annual_degradation'
+            'system_efficiency', 'latitude', 'longitude', 'tilt_angle', 'azimuth',
+            'annual_degradation'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'system_size_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'panel_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
-            'inverter_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
-            'system_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
-            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
-            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
-            'tilt_angle': forms.NumberInput(attrs={'class': 'form-control', 'step': '1', 'min': '0', 'max': '90'}),
-            'azimuth': forms.NumberInput(attrs={'class': 'form-control', 'step': '1', 'min': '0', 'max': '360'}),
-            'annual_degradation': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '0.1'}),
+            'system_size_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'panel_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
+            'inverter_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
+            'system_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
+            'tilt_angle': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '90'}),
+            'azimuth': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '360'}),
+            'annual_degradation': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
         }
         labels = {
             'name': 'System Name',
@@ -83,6 +108,7 @@ class PVSystemForm(forms.ModelForm):
 
 class BESSSystemForm(forms.ModelForm):
     """Form for BESS system specifications"""
+    
     class Meta:
         model = BESSSystem
         fields = [
@@ -92,13 +118,13 @@ class BESSSystemForm(forms.ModelForm):
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'capacity_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'usable_capacity_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'max_charge_rate_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'max_discharge_rate_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
-            'round_trip_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
-            'charge_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
-            'discharge_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
+            'capacity_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'usable_capacity_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'max_charge_rate_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'max_discharge_rate_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'round_trip_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
+            'charge_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
+            'discharge_efficiency': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
             'control_strategy': forms.Select(attrs={'class': 'form-control'}),
             'min_soc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
             'max_soc': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
@@ -120,6 +146,7 @@ class BESSSystemForm(forms.ModelForm):
 
 class FinancialParametersForm(forms.ModelForm):
     """Form for financial parameters"""
+    
     class Meta:
         model = FinancialParameters
         fields = [
@@ -129,17 +156,17 @@ class FinancialParametersForm(forms.ModelForm):
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'pv_cost_per_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '10'}),
-            'bess_cost_per_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '10'}),
-            'installation_cost_percent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
+            'pv_cost_per_kw': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'bess_cost_per_kwh': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'installation_cost_percent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
             'electricity_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
             'peak_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
             'off_peak_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
-            'federal_tax_credit': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '1'}),
+            'federal_tax_credit': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
             'state_incentive': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'}),
             'discount_rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
             'electricity_inflation': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001', 'min': '0', 'max': '1'}),
-            'system_lifetime': forms.NumberInput(attrs={'class': 'form-control', 'step': '1', 'min': '1', 'max': '50'}),
+            'system_lifetime': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '50'}),
         }
         labels = {
             'name': 'Parameter Set Name',
@@ -158,41 +185,21 @@ class FinancialParametersForm(forms.ModelForm):
 
 
 class QuickCalculatorForm(forms.Form):
-    """Simplified form for quick calculations"""
+    """Form for quick calculator"""
     annual_consumption = forms.FloatField(
-        label='Annual Energy Consumption (kWh)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '100'}),
-        help_text='Your total annual electricity consumption'
+        label="Annual Energy Consumption (kWh)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
-    system_size = forms.FloatField(
-        label='PV System Size (kW)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.5'}),
-        help_text='Size of the solar panel system'
+    pv_size = forms.FloatField(
+        label="PV System Size (kW)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
-    battery_capacity = forms.FloatField(
-        label='Battery Capacity (kWh)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '1'}),
-        help_text='Capacity of the battery storage system'
+    bess_size = forms.FloatField(
+        label="BESS Capacity (kWh)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
     electricity_rate = forms.FloatField(
-        label='Electricity Rate ($/kWh)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-        help_text='Your current electricity rate'
-    )
-    
-    pv_cost_per_kw = forms.FloatField(
-        label='PV Cost per kW ($)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '100'}),
-        initial=2000,
-        help_text='Cost per kW of PV system'
-    )
-    
-    battery_cost_per_kwh = forms.FloatField(
-        label='Battery Cost per kWh ($)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '10'}),
-        initial=500,
-        help_text='Cost per kWh of battery system'
+        label="Electricity Rate ($/kWh)",
+        initial=0.15,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.001'})
     ) 

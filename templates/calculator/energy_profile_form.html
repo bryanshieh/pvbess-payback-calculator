@@ -11,8 +11,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'calculator:home' %}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'calculator:detailed_calculator' %}">Detailed Calculator</a></li>
-                    <li class="breadcrumb-item active">Energy Profile</li>
+                    <li class="breadcrumb-item active" aria-current="page">Energy Profile</li>
                 </ol>
             </nav>
         </div>
@@ -42,68 +41,147 @@
                         Enter the total kWh consumed for each month.
                     </div>
 
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5>Profile Information</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        {{ form.name|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-6">
-                                        {{ form.peak_demand|as_crispy_field }}
-                                    </div>
+                        <!-- File Upload Section -->
+                        <div class="mb-4">
+                            <h4>Upload Energy Data (Optional)</h4>
+                            <p class="text-muted">
+                                Upload a CSV or XML file with your energy consumption data to automatically populate the monthly fields below.
+                                If more than 12 months of data is provided, the most recent 12 months will be used.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label for="energy-data-file">Energy Data File</label>
+                                <input type="file" class="form-control" id="energy-data-file" accept=".csv,.xml">
+                                <small class="form-text text-muted">
+                                    Supported formats: CSV, XML. Maximum file size: 10MB.
+                                </small>
+                            </div>
+                            
+                            <div id="file-upload-status" class="mt-2" style="display: none;">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-spinner fa-spin"></i> Processing file...
+                                </div>
+                            </div>
+                            
+                            <div id="file-upload-result" class="mt-2" style="display: none;">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check"></i> <span id="result-message"></span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5>Monthly Energy Consumption (kWh)</h5>
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.jan_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.feb_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.mar_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.apr_consumption|as_crispy_field }}
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.may_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.jun_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.jul_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.aug_consumption|as_crispy_field }}
+                        
+                        <hr>
+                        
+                        <!-- Manual Entry Section -->
+                        <div class="mb-4">
+                            <h4>Manual Entry</h4>
+                            <p class="text-muted">
+                                Enter your monthly energy consumption data manually, or use the file upload above to auto-populate these fields.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.name.id_for_label }}">Profile Name</label>
+                                {{ form.name }}
+                                <small class="form-text text-muted">Give your energy profile a descriptive name</small>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.jan_consumption.id_for_label }}">January (kWh)</label>
+                                        {{ form.jan_consumption }}
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.sep_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.oct_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.nov_consumption|as_crispy_field }}
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        {{ form.dec_consumption|as_crispy_field }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.feb_consumption.id_for_label }}">February (kWh)</label>
+                                        {{ form.feb_consumption }}
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.mar_consumption.id_for_label }}">March (kWh)</label>
+                                        {{ form.mar_consumption }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.apr_consumption.id_for_label }}">April (kWh)</label>
+                                        {{ form.apr_consumption }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.may_consumption.id_for_label }}">May (kWh)</label>
+                                        {{ form.may_consumption }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.jun_consumption.id_for_label }}">June (kWh)</label>
+                                        {{ form.jun_consumption }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.jul_consumption.id_for_label }}">July (kWh)</label>
+                                        {{ form.jul_consumption }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.aug_consumption.id_for_label }}">August (kWh)</label>
+                                        {{ form.aug_consumption }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.sep_consumption.id_for_label }}">September (kWh)</label>
+                                        {{ form.sep_consumption }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.oct_consumption.id_for_label }}">October (kWh)</label>
+                                        {{ form.oct_consumption }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.nov_consumption.id_for_label }}">November (kWh)</label>
+                                        {{ form.nov_consumption }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.dec_consumption.id_for_label }}">December (kWh)</label>
+                                        {{ form.dec_consumption }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.peak_demand.id_for_label }}">Peak Demand (kW)</label>
+                                {{ form.peak_demand }}
+                                <small class="form-text text-muted">Your highest recorded power demand</small>
                             </div>
                         </div>
 
@@ -124,7 +202,7 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'calculator:home' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back
                             </a>
                             <button type="submit" class="btn btn-primary">
@@ -196,5 +274,125 @@ function updateChart() {
     consumptionChart.data.datasets[0].data = data;
     consumptionChart.update();
 }
+
+// Initialize chart with current form values on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Update chart with any existing values
+    updateChart();
+    
+    const fileInput = document.getElementById('energy-data-file');
+    const statusDiv = document.getElementById('file-upload-status');
+    const resultDiv = document.getElementById('file-upload-result');
+    const resultMessage = document.getElementById('result-message');
+    
+    // Month field IDs in order
+    const monthFields = [
+        'jan_consumption',
+        'feb_consumption', 
+        'mar_consumption',
+        'apr_consumption',
+        'may_consumption',
+        'jun_consumption',
+        'jul_consumption',
+        'aug_consumption',
+        'sep_consumption',
+        'oct_consumption',
+        'nov_consumption',
+        'dec_consumption'
+    ];
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Show processing status
+        statusDiv.style.display = 'block';
+        resultDiv.style.display = 'none';
+        
+        // Create FormData for AJAX upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        // Send AJAX request
+        fetch('{% url "calculator:ajax_file_upload" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            statusDiv.style.display = 'none';
+            
+            if (data.success) {
+                // Populate form fields with parsed data
+                data.monthly_data.forEach((value, index) => {
+                    const fieldId = 'id_' + monthFields[index];
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.value = value.toFixed(2);
+                    }
+                });
+                
+                // Update the chart after setting values
+                setTimeout(() => {
+                    updateChart();
+                }, 100);
+                
+                // Show success message
+                resultMessage.textContent = data.message;
+                resultDiv.className = 'mt-2 alert alert-success';
+                resultDiv.style.display = 'block';
+                
+                // Calculate and display annual total
+                const annualTotal = data.monthly_data.reduce((sum, value) => sum + value, 0);
+                resultMessage.textContent += ` | Annual Total: ${annualTotal.toFixed(0)} kWh`;
+                
+            } else {
+                // Show error message
+                resultMessage.textContent = data.error;
+                resultDiv.className = 'mt-2 alert alert-danger';
+                resultDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            statusDiv.style.display = 'none';
+            resultMessage.textContent = 'Error processing file. Please try again.';
+            resultDiv.className = 'mt-2 alert alert-danger';
+            resultDiv.style.display = 'block';
+            console.error('Error:', error);
+        });
+    });
+    
+    // Add form submission debugging
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        console.log('Form submitted');
+        
+        // Check if we have a profile name
+        const nameField = document.getElementById('id_name');
+        if (!nameField.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a profile name.');
+            return;
+        }
+        
+        // Check if we have any monthly data
+        let hasData = false;
+        monthFields.forEach(month => {
+            const field = document.getElementById('id_' + month);
+            if (field && parseFloat(field.value) > 0) {
+                hasData = true;
+            }
+        });
+        
+        if (!hasData) {
+            e.preventDefault();
+            alert('Please either upload a file or enter monthly consumption data.');
+            return;
+        }
+        
+        console.log('Form validation passed, submitting...');
+    });
+});
 </script>
 {% endblock %} 

@@ -38,7 +38,7 @@
         <div class="col-md-3 mb-3">
             <div class="metric-card">
                 <div class="metric-value">
-                    {% if results.payback_period == float('inf') %}
+                    {% if results.payback_period > 1000 %}
                         N/A
                     {% else %}
                         {{ results.payback_period|floatformat:1 }}
@@ -161,7 +161,7 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{% url 'calculator:detailed_calculator' %}" class="btn btn-primary">
+                        <a href="{% url 'calculator:energy_profile_form' %}" class="btn btn-primary">
                             <i class="fas fa-chart-line me-2"></i>Detailed Analysis
                         </a>
                         <a href="{% url 'calculator:home' %}" class="btn btn-outline-secondary">

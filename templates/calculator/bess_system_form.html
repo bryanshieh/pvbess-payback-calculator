@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}BESS System Specifications - PV + BESS Calculator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Step 3: BESS System Specifications</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>System Information</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.name.id_for_label }}">System Name</label>
+                                            {{ form.name }}
+                                            <small class="form-text text-muted">Give your BESS system a descriptive name</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.capacity_kwh.id_for_label }}">Total Capacity (kWh)</label>
+                                            {{ form.capacity_kwh }}
+                                            <small class="form-text text-muted">Total battery capacity</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Battery Specifications</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.usable_capacity_kwh.id_for_label }}">Usable Capacity (kWh)</label>
+                                            {{ form.usable_capacity_kwh }}
+                                            <small class="form-text text-muted">Available capacity considering DoD limits</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_charge_rate_kw.id_for_label }}">Max Charge Rate (kW)</label>
+                                            {{ form.max_charge_rate_kw }}
+                                            <small class="form-text text-muted">Maximum charging power</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_discharge_rate_kw.id_for_label }}">Max Discharge Rate (kW)</label>
+                                            {{ form.max_discharge_rate_kw }}
+                                            <small class="form-text text-muted">Maximum discharging power</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.control_strategy.id_for_label }}">Control Strategy</label>
+                                            {{ form.control_strategy }}
+                                            <small class="form-text text-muted">Battery operation strategy</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Efficiency Parameters</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.round_trip_efficiency.id_for_label }}">Round-trip Efficiency</label>
+                                            {{ form.round_trip_efficiency }}
+                                            <small class="form-text text-muted">Typical range: 0.85-0.95</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.charge_efficiency.id_for_label }}">Charge Efficiency</label>
+                                            {{ form.charge_efficiency }}
+                                            <small class="form-text text-muted">Typical range: 0.90-0.98</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="{{ form.discharge_efficiency.id_for_label }}">Discharge Efficiency</label>
+                                            {{ form.discharge_efficiency }}
+                                            <small class="form-text text-muted">Typical range: 0.90-0.98</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>State of Charge Limits</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.min_soc.id_for_label }}">Minimum SoC</label>
+                                            {{ form.min_soc }}
+                                            <small class="form-text text-muted">Minimum state of charge (0-1)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.max_soc.id_for_label }}">Maximum SoC</label>
+                                            {{ form.max_soc }}
+                                            <small class="form-text text-muted">Maximum state of charge (0-1)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'calculator:pv_system_form' %}" class="btn btn-secondary">Back</a>
+                            <button type="submit" class="btn btn-primary">Next: Financial Parameters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
