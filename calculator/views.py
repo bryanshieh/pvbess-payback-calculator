@@ -3,12 +3,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 import json
 
 from .models import EnergyProfile, PVSystem, BESSSystem, FinancialParameters, CalculationResult
 from .forms import (EnergyProfileForm, PVSystemForm, BESSSystemForm, 
                    FinancialParametersForm, QuickCalculatorForm)
-from .utils import run_complete_calculation, quick_calculation
+from .utils import run_complete_calculation, quick_calculation, parse_energy_data_file, get_most_recent_12_months
 
 
 def home(request):
@@ -16,18 +17,20 @@ def home(request):
     if request.method == 'POST':
         form = QuickCalculatorForm(request.POST)
         if form.is_valid():
+            # Get form data
+            annual_consumption = form.cleaned_data['annual_consumption']
+            pv_size = form.cleaned_data['pv_size']
+            bess_size = form.cleaned_data['bess_size']
+            electricity_rate = form.cleaned_data['electricity_rate']
+            
             # Run quick calculation
             results = quick_calculation(
-                annual_consumption=form.cleaned_data['annual_consumption'],
-                system_size=form.cleaned_data['system_size'],
-                battery_capacity=form.cleaned_data['battery_capacity'],
-                electricity_rate=form.cleaned_data['electricity_rate'],
-                pv_cost_per_kw=form.cleaned_data['pv_cost_per_kw'],
-                battery_cost_per_kwh=form.cleaned_data['battery_cost_per_kwh']
+                annual_consumption, pv_size, bess_size, electricity_rate
             )
+            
             return render(request, 'calculator/quick_results.html', {
-                'form': form,
-                'results': results
+                'results': results,
+                'form': form
             })
     else:
         form = QuickCalculatorForm()
@@ -40,147 +43,172 @@ def detailed_calculator(request):
     return render(request, 'calculator/detailed_calculator.html')
 
 
-def energy_profile_create(request):
-    """Create energy profile"""
+@login_required
+def energy_profile_form(request):
+    """Energy profile form with file upload support"""
     if request.method == 'POST':
+        print(f"POST data keys: {list(request.POST.keys())}")
+        print(f"FILES keys: {list(request.FILES.keys())}")
+        
         form = EnergyProfileForm(request.POST)
         if form.is_valid():
-            profile = form.save(commit=False)
-            if request.user.is_authenticated:
-                profile.user = request.user
-            profile.save()
+            energy_profile = form.save(commit=False)
+            energy_profile.user = request.user
+            
+            # Handle file upload (either direct upload or AJAX-populated values)
+            if 'energy_data_file' in request.FILES:
+                # Direct file upload during form submission
+                uploaded_file = request.FILES['energy_data_file']
+                
+                # Validate file size and type
+                if uploaded_file.size > 10 * 1024 * 1024:
+                    messages.error(request, "File size must be under 10MB.")
+                    return render(request, 'calculator/energy_profile_form.html', {'form': form})
+                
+                allowed_extensions = ['.csv', '.xml']
+                file_extension = uploaded_file.name.lower()
+                if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                    messages.error(request, "Only CSV and XML files are allowed.")
+                    return render(request, 'calculator/energy_profile_form.html', {'form': form})
+                
+                parsed_data = parse_energy_data_file(uploaded_file)
+                
+                if parsed_data:
+                    # Get the most recent 12 months of data
+                    monthly_consumption = get_most_recent_12_months(parsed_data)
+                    
+                    # Populate form fields with parsed data
+                    energy_profile.jan_consumption = monthly_consumption[0]
+                    energy_profile.feb_consumption = monthly_consumption[1]
+                    energy_profile.mar_consumption = monthly_consumption[2]
+                    energy_profile.apr_consumption = monthly_consumption[3]
+                    energy_profile.may_consumption = monthly_consumption[4]
+                    energy_profile.jun_consumption = monthly_consumption[5]
+                    energy_profile.jul_consumption = monthly_consumption[6]
+                    energy_profile.aug_consumption = monthly_consumption[7]
+                    energy_profile.sep_consumption = monthly_consumption[8]
+                    energy_profile.oct_consumption = monthly_consumption[9]
+                    energy_profile.nov_consumption = monthly_consumption[10]
+                    energy_profile.dec_consumption = monthly_consumption[11]
+                    
+                    messages.success(request, f"Successfully parsed {len(parsed_data['dates'])} data points from uploaded file.")
+                else:
+                    messages.error(request, "Could not parse the uploaded file. Please check the file format.")
+            else:
+                # No file uploaded, but form has monthly consumption data (from AJAX upload)
+                # The form validation ensures we have valid monthly data
+                messages.success(request, 'Energy profile created from manual entry data.')
+            
+            energy_profile.save()
             messages.success(request, 'Energy profile created successfully!')
-            return redirect('pv_system_create')
+            return redirect('calculator:pv_system_form')
+        else:
+            # Form is invalid - show validation errors
+            print(f"Form errors: {form.errors}")
+            messages.error(request, 'Please correct the errors below.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = EnergyProfileForm()
     
     return render(request, 'calculator/energy_profile_form.html', {'form': form})
 
 
-def pv_system_create(request):
-    """Create PV system"""
+@login_required
+def pv_system_form(request):
+    """PV system specifications form"""
     if request.method == 'POST':
         form = PVSystemForm(request.POST)
         if form.is_valid():
-            pv_system = form.save()
-            messages.success(request, 'PV system created successfully!')
-            return redirect('bess_system_create')
+            pv_system = form.save(commit=False)
+            pv_system.user = request.user
+            pv_system.save()
+            messages.success(request, 'PV system specifications saved!')
+            return redirect('calculator:bess_system_form')
     else:
         form = PVSystemForm()
     
     return render(request, 'calculator/pv_system_form.html', {'form': form})
 
 
-def bess_system_create(request):
-    """Create BESS system"""
+@login_required
+def bess_system_form(request):
+    """BESS system specifications form"""
     if request.method == 'POST':
         form = BESSSystemForm(request.POST)
         if form.is_valid():
-            bess_system = form.save()
-            messages.success(request, 'BESS system created successfully!')
-            return redirect('financial_params_create')
+            bess_system = form.save(commit=False)
+            bess_system.user = request.user
+            bess_system.save()
+            messages.success(request, 'BESS system specifications saved!')
+            return redirect('calculator:financial_parameters_form')
     else:
         form = BESSSystemForm()
     
     return render(request, 'calculator/bess_system_form.html', {'form': form})
 
 
-def financial_params_create(request):
-    """Create financial parameters"""
+@login_required
+def financial_parameters_form(request):
+    """Financial parameters form"""
     if request.method == 'POST':
         form = FinancialParametersForm(request.POST)
         if form.is_valid():
-            financial_params = form.save()
-            messages.success(request, 'Financial parameters created successfully!')
-            return redirect('run_calculation')
+            financial_params = form.save(commit=False)
+            financial_params.user = request.user
+            financial_params.save()
+            messages.success(request, 'Financial parameters saved!')
+            return redirect('calculator:detailed_calculator')
     else:
         form = FinancialParametersForm()
     
-    return render(request, 'calculator/financial_params_form.html', {'form': form})
+    return render(request, 'calculator/financial_parameters_form.html', {'form': form})
 
 
-def run_calculation(request):
-    """Run the complete calculation"""
-    # Get the most recent inputs (in a real app, you'd use session or user-specific data)
+@login_required
+def detailed_calculator(request):
+    """Detailed calculator with all parameters"""
+    # Get the most recent data for each component
     try:
-        energy_profile = EnergyProfile.objects.latest('created_at')
-        pv_system = PVSystem.objects.latest('created_at')
-        bess_system = BESSSystem.objects.latest('created_at')
-        financial_params = FinancialParameters.objects.latest('created_at')
+        energy_profile = EnergyProfile.objects.filter(user=request.user).latest('created_at')
+        pv_system = PVSystem.objects.filter(user=request.user).latest('created_at')
+        bess_system = BESSSystem.objects.filter(user=request.user).latest('created_at')
+        financial_params = FinancialParameters.objects.filter(user=request.user).latest('created_at')
     except (EnergyProfile.DoesNotExist, PVSystem.DoesNotExist, 
             BESSSystem.DoesNotExist, FinancialParameters.DoesNotExist):
-        messages.error(request, 'Please complete all input forms first.')
-        return redirect('energy_profile_create')
+        messages.error(request, 'Please complete all previous steps first.')
+        return redirect('calculator:energy_profile_form')
     
     # Run calculation
     results = run_complete_calculation(energy_profile, pv_system, bess_system, financial_params)
     
-    # Save results
+    # Save calculation result
     calculation_result = CalculationResult.objects.create(
-        user=request.user if request.user.is_authenticated else None,
+        user=request.user,
         name=f"Calculation {energy_profile.name}",
         energy_profile=energy_profile,
         pv_system=pv_system,
         bess_system=bess_system,
         financial_params=financial_params,
-        total_system_cost=results['system_cost'],
-        annual_savings=results['annual_savings'],
-        payback_period_years=results['financial_metrics']['payback_period'],
-        npv_25_years=results['financial_metrics']['npv'],
-        irr_percent=results['financial_metrics']['irr'] * 100
+        total_system_cost=results['financial_results']['total_system_cost'],
+        annual_savings=results['financial_results']['annual_savings'],
+        payback_period_years=results['financial_results']['payback_period_years'],
+        npv_25_years=results['financial_results']['npv_25_years'],
+        irr_percent=results['financial_results']['irr_percent']
     )
     
-    # Store detailed results
-    monthly_data = {
-        'generation': results['monthly_generation'],
-        'consumption': results['monthly_consumption'],
-        'grid_import': results['battery_results']['grid_import'],
-        'grid_export': results['battery_results']['grid_export'],
-        'self_consumption': results['battery_results']['self_consumption'],
-        'battery_state': results['battery_results']['battery_state']
-    }
-    calculation_result.set_monthly_results(monthly_data)
-    
-    annual_data = {
-        'total_generation': results['total_annual_generation'],
-        'total_consumption': results['total_annual_consumption'],
-        'self_consumption_rate': results['self_consumption_rate'],
-        'total_grid_import': sum(results['battery_results']['grid_import']),
-        'total_grid_export': sum(results['battery_results']['grid_export'])
-    }
-    calculation_result.set_annual_results(annual_data)
+    # Store detailed results as JSON
+    calculation_result.set_monthly_results(results['monthly_results'])
+    calculation_result.set_annual_results(results['financial_results'])
     calculation_result.save()
     
-    return render(request, 'calculator/results.html', {
+    return render(request, 'calculator/detailed_calculator.html', {
         'results': results,
-        'calculation_result': calculation_result,
         'energy_profile': energy_profile,
         'pv_system': pv_system,
         'bess_system': bess_system,
         'financial_params': financial_params
-    })
-
-
-def results_detail(request, result_id):
-    """View detailed results"""
-    calculation_result = get_object_or_404(CalculationResult, id=result_id)
-    
-    # Check if user has permission to view this result
-    if calculation_result.user and calculation_result.user != request.user:
-        messages.error(request, 'You do not have permission to view this result.')
-        return redirect('home')
-    
-    return render(request, 'calculator/results_detail.html', {
-        'calculation_result': calculation_result
-    })
-
-
-@login_required
-def my_calculations(request):
-    """View user's calculation history"""
-    calculations = CalculationResult.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'calculator/my_calculations.html', {
-        'calculations': calculations
     })
 
 
@@ -192,6 +220,47 @@ def about(request):
 def help_page(request):
     """Help page"""
     return render(request, 'calculator/help.html')
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ajax_file_upload(request):
+    """AJAX endpoint for file upload processing"""
+    try:
+        if 'file' not in request.FILES:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+        
+        uploaded_file = request.FILES['file']
+        parsed_data = parse_energy_data_file(uploaded_file)
+        
+        if parsed_data:
+            monthly_consumption = get_most_recent_12_months(parsed_data)
+            return JsonResponse({
+                'success': True,
+                'monthly_data': monthly_consumption,
+                'total_records': len(parsed_data['dates']),
+                'message': f"Successfully parsed {len(parsed_data['dates'])} data points"
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Could not parse the uploaded file. Please check the file format.'
+            }, status=400)
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error processing file: {str(e)}'
+        }, status=500)
+
+
+@login_required
+def my_calculations(request):
+    """View user's calculation history"""
+    calculations = CalculationResult.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'calculator/my_calculations.html', {
+        'calculations': calculations
+    })
 
 
 @csrf_exempt
